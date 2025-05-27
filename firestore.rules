@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Funciones auxiliares simplificadas
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Verificación de roles sin recursividad
+    function hasRole(role) {
+      return request.auth != null && getUserData().role == role;
+    }
+    
+    // Función para verificar si es administrador o asesor
+    function isAdminOrAsesor() {
+      return hasRole('administrador') || hasRole('asesor');
+    }
+    
+    // Acceso general para datos públicos
+    match /tracking_questions/{questionId} {
+      // Todos los usuarios autenticados pueden leer las preguntas
+      allow read: if request.auth != null;
+      // Solo administradores pueden editar preguntas
+      allow write: if hasRole('administrador');
+    }
+    
+    // Reglas para usuarios
+    match /users/{userId} {
+      // Los usuarios pueden leer y modificar su propio documento
+      allow read, write: if request.auth.uid == userId;
+      
+      // Administradores tienen acceso completo a todos los usuarios
+      allow read, write: if hasRole('administrador');
+      
+      // Asesores pueden leer datos de cualquier usuario
+      allow read: if hasRole('asesor');
+      
+      // Asesores pueden actualizar datos básicos de alumnos
+      allow update: if hasRole('asesor') && 
+                    (request.resource.data.role == resource.data.role) && // No puede cambiar rol
+                    (!request.resource.data.diff(resource.data).affectedKeys()
+                      .hasAny(['uid', 'createdAt', 'createdBy'])); // No puede cambiar campos de sistema
+    }
+    
+    // Reglas para grupos
+    match /groups/{groupId} {
+      // Todos pueden leer información de grupos
+      allow read: if request.auth != null;
+      // Solo administradores pueden crear/modificar grupos
+      allow write: if hasRole('administrador');
+    }
+    
+    // Reglas para seguimientos
+    match /seguimientos/{seguimientoId} {
+      // Administradores tienen acceso completo
+      allow read, write: if hasRole('administrador');
+      
+      // Asesores pueden leer todos los seguimientos y crear/modificar los que ellos crearon
+      allow read: if hasRole('asesor');
+      allow create: if hasRole('asesor');
+      allow update, delete: if hasRole('asesor') && 
+                           (resource.data.createdBy == request.auth.uid || 
+                            resource.data.updatedBy == request.auth.uid);
+      
+      // Alumnos pueden ver sus propios seguimientos
+      allow read: if request.auth != null && 
+                  resource.data.tipo == 'individual' && 
+                  resource.data.alumnoId == request.auth.uid;
+    }
+    
+    // Reglas para otras colecciones
+    match /{collection}/{document} {
+      allow read: if request.auth != null && 
+                 (collection == 'tokens' || 
+                  collection == 'observations');
+      allow write: if isAdminOrAsesor();
+    }
+  }
+}
