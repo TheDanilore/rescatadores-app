@@ -31,7 +31,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     try {
       // Obtener conteo de usuarios por rol
       final usersSnapshot =
-          await FirebaseFirestore.instance.collection('users').get();
+          await FirebaseFirestore.instance.collection('users_rescatadores_app').get();
 
       final roleCounts = {'alumno': 0, 'asesor': 0, 'administrador': 0};
 
@@ -86,7 +86,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       // Obtener grupos únicos
       final groupsSnapshot =
           await FirebaseFirestore.instance
-              .collection('users')
+              .collection('users_rescatadores_app')
               .where('groups', isNull: false)
               .get();
 
@@ -266,7 +266,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         'color': Colors.blue,
       },
       {
-        'title': 'Discípulos',
+        'title': 'Personas',
         'value': _userRoleCounts['alumno'].toString(),
         'change': '+${(_userRoleCounts['alumno']! * 0.18).round()}%',
         'isPositive': true,
@@ -274,7 +274,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         'color': Colors.green,
       },
       {
-        'title': 'Acompañantes',
+        'title': 'Rescatadores',
         'value': _userRoleCounts['asesor'].toString(),
         'change': '+${(_userRoleCounts['asesor']! * 0.05).round()}%',
         'isPositive': true,
@@ -442,14 +442,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Grupos de Acompañantes',
+              'Grupos de Rescatadores',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _advisorGroups.isEmpty
-                ? const Center(child: Text('No hay acompañantes con grupos'))
+                ? const Center(child: Text('No hay rescatadores con grupos'))
                 : Column(
                   children:
                       _advisorGroups.map((advisor) {
@@ -474,7 +474,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      advisor['name'] ?? 'Acompañante',
+                                      advisor['name'] ?? 'Rescatador',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),

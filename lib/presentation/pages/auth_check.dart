@@ -31,7 +31,7 @@ class AuthCheck extends StatelessWidget {
         if (snapshot.hasData && snapshot.data != null) {
           return FutureBuilder<DocumentSnapshot>(
             future: FirebaseFirestore.instance
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .doc(snapshot.data!.uid)
                 .get(),
             builder: (context, userSnapshot) {

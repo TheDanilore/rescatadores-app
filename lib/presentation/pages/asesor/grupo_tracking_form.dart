@@ -96,7 +96,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
     try {
       // Obtener documento del usuario
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(_userId).get();
+          await _firestore.collection('users_rescatadores_app').doc(_userId).get();
 
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
@@ -185,7 +185,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
                   child: Column(
                     children: [
                       Text(
-                        'Todos los Discípulos (${_alumnosGrupo.length})',
+                        'Todas las personas (${_alumnosGrupo.length})',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryColor,
@@ -218,7 +218,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
   ) {
     // Verificar que el alumno tenga un ID
     if (!alumno.containsKey('id')) {
-      print('ADVERTENCIA: Alumno sin ID en _buildAnimatedAlumnoItem');
+      print('ADVERTENCIA: Persona sin ID en _buildAnimatedAlumnoItem');
     }
 
     return Material(
@@ -280,7 +280,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
     try {
       QuerySnapshot previousTracking =
           await _firestore
-              .collection('seguimientos')
+              .collection('seguimientos_rescatadores_app')
               .where('groupId', isEqualTo: widget.groupId)
               .where('tipo', isEqualTo: 'grupal')
               .orderBy('timestamp', descending: true)
@@ -373,7 +373,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
     try {
       // Primero, obtener los datos del asesor actual
       DocumentSnapshot userSnapshot =
-          await _firestore.collection('users').doc(_userId).get();
+          await _firestore.collection('users_rescatadores_app').doc(_userId).get();
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
@@ -404,7 +404,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
         // Cargar alumnos del grupo
         QuerySnapshot alumnosSnapshot =
             await _firestore
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .where('role', isEqualTo: 'alumno')
                 .where('groups', arrayContains: widget.groupId)
                 .get();
@@ -454,7 +454,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
     try {
       _currentWeekId = _generateWeekId(_selectedWeekStart);
       DocumentSnapshot existingTrackingSnapshot =
-          await _firestore.collection('seguimientos').doc(_currentWeekId).get();
+          await _firestore.collection('seguimientos_rescatadores_app').doc(_currentWeekId).get();
 
       _clearFormFields();
 
@@ -537,7 +537,7 @@ class _GrupoTrackingFormState extends State<GrupoTrackingForm> {
 
       // Guardar en Firestore
       await _firestore
-          .collection('seguimientos')
+          .collection('seguimientos_rescatadores_app')
           .doc(_currentWeekId)
           .set(trackingData, SetOptions(merge: true));
 

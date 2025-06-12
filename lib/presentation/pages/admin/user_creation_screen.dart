@@ -36,8 +36,8 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
 
   // Traducciones de roles para la UI
   final Map<String, String> _roleDisplay = {
-    'alumno': 'Discípulo',
-    'asesor': 'Acompañante',
+    'alumno': 'Persona',
+    'asesor': 'Rescatador',
     'administrador': 'Coordinador',
   };
 
@@ -63,7 +63,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
     try {
       final QuerySnapshot usersSnapshot =
           await FirebaseFirestore.instance
-              .collection('users')
+              .collection('users_rescatadores_app')
               .where('role', isEqualTo: 'administrador')
               .get();
 
@@ -139,7 +139,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
 
       // Hacer la llamada REST a la función
       final response = await http.post(
-        Uri.parse('https://createuserrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://createuserrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',

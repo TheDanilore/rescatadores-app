@@ -45,7 +45,7 @@ class ProfileScreen extends StatelessWidget {
         child: StreamBuilder<DocumentSnapshot>(
           stream:
               FirebaseFirestore.instance
-                  .collection('users')
+                  .collection('users_rescatadores_app')
                   .doc(user.uid)
                   .snapshots(),
           builder: (context, snapshot) {

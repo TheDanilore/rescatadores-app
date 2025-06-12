@@ -30,7 +30,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen> {
 
       // Obtener el documento del usuario actual
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(currentUser.uid)
           .get();
 
@@ -107,7 +107,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen> {
 
         // Agregar el nuevo grupo a los grupos del administrador
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection('users_rescatadores_app')
             .doc(currentUser.uid)
             .update({
           'groups': FieldValue.arrayUnion([result])
@@ -160,7 +160,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen> {
 
         // Eliminar grupo de los grupos del administrador
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection('users_rescatadores_app')
             .doc(currentUser.uid)
             .update({
           'groups': FieldValue.arrayRemove([group])
@@ -168,7 +168,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen> {
 
         // Buscar y actualizar usuarios con este grupo
         final usersSnapshot = await FirebaseFirestore.instance
-            .collection('users')
+            .collection('users_rescatadores_app')
             .where('groups', arrayContains: group)
             .get();
 
@@ -207,7 +207,7 @@ class _GroupsManagementScreenState extends State<GroupsManagementScreen> {
   Future<void> _viewGroupUsers(String group) async {
     try {
       final usersSnapshot = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .where('groups', arrayContains: group)
           .get();
 

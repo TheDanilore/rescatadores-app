@@ -425,7 +425,7 @@ class _ReportesScreenState extends State<ReportesScreen>
                     ),
                     child: TextField(
                       decoration: InputDecoration(
-                        labelText: 'Buscar discípulo',
+                        labelText: 'Buscar persona',
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(),
                       ),

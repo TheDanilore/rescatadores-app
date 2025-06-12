@@ -118,7 +118,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                   ),
                   Text(
                     _roleController.text.toLowerCase() == 'asesor'
-                        ? 'ACOMPAÑANTE'
+                        ? 'RESCATADOR'
                         : _roleController.text.toUpperCase(),
                     style: const TextStyle(
                       fontSize: 16,
@@ -271,7 +271,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                     title: 'Rol',
                     value:
                         _roleController.text.toLowerCase() == 'asesor'
-                            ? 'Acompañante'
+                            ? 'Rescatador'
                             : _roleController.text,
                   ),
                   _buildGroupsRow(),
@@ -402,7 +402,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                   title: 'Rol',
                   value:
                       _roleController.text.toLowerCase() == 'asesor'
-                          ? 'Acompañante'
+                          ? 'Rescatador'
                           : _roleController.text,
                 ),
                 _buildGroupsRow(),
@@ -578,7 +578,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
       if (currentUser != null) {
         DocumentSnapshot snapshot =
             await FirebaseFirestore.instance
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .doc(currentUser.uid)
                 .get();
 
@@ -656,7 +656,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -758,7 +758,7 @@ void _guardarCambios() async {
     };
 
     await FirebaseFirestore.instance
-        .collection('users')
+        .collection('users_rescatadores_app')
         .doc(currentUser.uid)
         .update(updateData);
 
@@ -853,7 +853,7 @@ Future<void> _actualizarPerfilSinCambioCorreo() async {
       };
 
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(currentUser.uid)
           .update(updateData);
 

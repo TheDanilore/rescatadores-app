@@ -210,7 +210,7 @@ class _CombinedAlumnoDetailsFormState
       // Actualizar los datos en Firestore
       try {
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection('users_rescatadores_app')
             .doc(widget.alumnoId)
             .update(updateData);
         print('Datos actualizados exitosamente en Firestore');
@@ -274,7 +274,7 @@ class _CombinedAlumnoDetailsFormState
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -305,7 +305,7 @@ class _CombinedAlumnoDetailsFormState
   Future<String> _getUserRole(String uid) async {
     try {
       final userDoc =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          await FirebaseFirestore.instance.collection('users_rescatadores_app').doc(uid).get();
 
       if (userDoc.exists) {
         return userDoc.data()?['role'] ?? 'desconocido';

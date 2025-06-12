@@ -27,7 +27,7 @@ class _AsesorHomeScreenState extends State<AsesorHomeScreen> {
       children: [],
     ),
     MenuOption(
-      title: 'Registrar Nuevo Discípulo',
+      title: 'Registrar Nuevo Persona',
       icon: Icons.person_add_outlined,
       pageIndex: 1,
       children: [],
@@ -68,7 +68,7 @@ class _AsesorHomeScreenState extends State<AsesorHomeScreen> {
       if (currentUser != null) {
         DocumentSnapshot asesorDoc =
             await FirebaseFirestore.instance
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .doc(currentUser.uid)
                 .get();
 
@@ -81,7 +81,7 @@ class _AsesorHomeScreenState extends State<AsesorHomeScreen> {
         }
       }
     } catch (e) {
-      print('Error al cargar los grupos del asesor: $e');
+      print('Error al cargar los grupos del rescatador: $e');
     }
   }
 
@@ -162,7 +162,7 @@ class _AsesorHomeScreenState extends State<AsesorHomeScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Asesor',
+                    'Rescatador',
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ],

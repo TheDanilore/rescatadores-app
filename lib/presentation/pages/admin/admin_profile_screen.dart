@@ -582,7 +582,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       if (currentUser != null) {
         DocumentSnapshot snapshot =
             await FirebaseFirestore.instance
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .doc(currentUser.uid)
                 .get();
 
@@ -660,7 +660,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -767,7 +767,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       };
 
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(currentUser.uid)
           .update(updateData);
 
@@ -876,7 +876,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
         };
 
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection('users_rescatadores_app')
             .doc(currentUser.uid)
             .update(updateData);
 

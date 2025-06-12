@@ -7,7 +7,7 @@ class TrackingQuestionsService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Colección de preguntas de seguimiento
-  final String _collection = 'tracking_questions';
+  final String _collection = 'tracking_questions_rescatadores_app';
 
   // Obtener todas las preguntas de seguimiento por tipo
   Future<List<TrackingQuestion>> getQuestionsByType(String type) async {

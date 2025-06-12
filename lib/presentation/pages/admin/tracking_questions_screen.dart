@@ -21,7 +21,6 @@ class _TrackingQuestionsScreenState extends State<TrackingQuestionsScreen>
   List<TrackingQuestion> _studentQuestions = [];
 
   bool _isLoading = true;
-  bool _isDragging = false;
 
   bool _hasError = false;
   String _errorMessage = '';
@@ -154,7 +153,7 @@ class _TrackingQuestionsScreenState extends State<TrackingQuestionsScreen>
               ),
               tabs: const [
                 Tab(text: 'Preguntas para Grupos', icon: Icon(Icons.group)),
-                Tab(text: 'Preguntas para Discípulos', icon: Icon(Icons.person)),
+                Tab(text: 'Preguntas para Personas', icon: Icon(Icons.person)),
               ],
             ),
           ),
@@ -580,7 +579,6 @@ class _TrackingQuestionsScreenState extends State<TrackingQuestionsScreen>
     String type,
   ) {
     setState(() {
-      _isDragging = true;
 
       if (newIndex > oldIndex) {
         newIndex -= 1;
@@ -601,7 +599,6 @@ class _TrackingQuestionsScreenState extends State<TrackingQuestionsScreen>
         _studentQuestions = List.from(questions);
       }
 
-      _isDragging = false;
     });
 
     // Mostrar un indicador de progreso mientras se guarda

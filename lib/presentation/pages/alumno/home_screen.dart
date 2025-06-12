@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panel del Discípulo'),
+        title: const Text('Panel de Persona'),
         backgroundColor: AppTheme.primaryColor,
         actions: [
           IconButton(

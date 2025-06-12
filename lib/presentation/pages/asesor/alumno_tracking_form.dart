@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-
 import 'package:rescatadores_app/config/theme.dart';
 import 'package:rescatadores_app/domain/models/tracking_question.dart';
 import 'package:rescatadores_app/domain/services/tracking_questions_service.dart';
-
 import 'package:rescatadores_app/presentation/pages/asesor/widgets/week_navigator.dart';
 import 'package:rescatadores_app/presentation/pages/asesor/widgets/tracking_form_section.dart';
 import 'package:rescatadores_app/presentation/pages/asesor/widgets/save_tracking_button.dart';
@@ -77,7 +75,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
     try {
       // Obtener el seguimiento existente de Firestore
       DocumentSnapshot trackingSnapshot =
-          await _firestore.collection('seguimientos').doc(widget.weekId).get();
+          await _firestore.collection('seguimientos_rescatadores_app').doc(widget.weekId).get();
 
       if (trackingSnapshot.exists) {
         Map<String, dynamic> data =
@@ -123,7 +121,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
 
     try {
       DocumentSnapshot alumnoSnapshot =
-          await _firestore.collection('users').doc(widget.alumnoId).get();
+          await _firestore.collection('users_rescatadores_app').doc(widget.alumnoId).get();
 
       if (!mounted) return;
 
@@ -136,7 +134,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No se encontró información del discípulo'),
+              content: Text('No se encontró información del Persona'),
             ),
           );
           Navigator.pop(context);
@@ -145,7 +143,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar datos del discípulo: $e')),
+          SnackBar(content: Text('Error al cargar datos del Persona: $e')),
         );
         Navigator.pop(context);
       }
@@ -181,14 +179,14 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Seguimiento de ${_alumnoData['name'] ?? 'Discípulo'}',
+          'Seguimiento de ${_alumnoData['name'] ?? 'Persona'}',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppTheme.primaryColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.person_search),
-            tooltip: 'Detalles del Discípulo',
+            tooltip: 'Detalles del Persona',
             onPressed:
                 () => AlumnoDetailsModal.show(
                   context,
@@ -255,7 +253,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
             CircularProgressIndicator(color: AppTheme.primaryColor),
             const SizedBox(height: 16),
             Text(
-              'Cargando información del discípulo...',
+              'Cargando información del Persona...',
               style: TextStyle(
                 color: AppTheme.textSecondaryColor,
                 fontSize: 16,
@@ -369,7 +367,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
 
       // Guardar en Firestore
       await _firestore
-          .collection('seguimientos')
+          .collection('seguimientos_rescatadores_app')
           .doc(_currentWeekId)
           .set(trackingData, SetOptions(merge: true));
 
@@ -392,7 +390,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
 
       // Verificar si ya existe un seguimiento para esta semana
       DocumentSnapshot existingTrackingSnapshot =
-          await _firestore.collection('seguimientos').doc(_currentWeekId).get();
+          await _firestore.collection('seguimientos_rescatadores_app').doc(_currentWeekId).get();
 
       // Limpiar campos
       _clearFormFields();
@@ -460,7 +458,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
     try {
       QuerySnapshot previousTracking =
           await _firestore
-              .collection('seguimientos')
+              .collection('seguimientos_rescatadores_app')
               .where('alumnoId', isEqualTo: widget.alumnoId)
               .where('tipo', isEqualTo: 'individual')
               .orderBy('timestamp', descending: true)

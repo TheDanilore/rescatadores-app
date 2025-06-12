@@ -42,34 +42,49 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // 1. Login con Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
 
-      // Actualizar la fecha y hora del último inicio de sesión
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .update({'lastLogin': FieldValue.serverTimestamp()});
+      final userId = userCredential.user!.uid;
 
-      // Obtener el documento del usuario de Firestore (ahora con lastLogin actualizado)
-      DocumentSnapshot userDoc =
+      // 2. Obtener documento en Firestore
+      final userDocSnapshot =
           await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user!.uid)
+              .collection('users_rescatadores_app')
+              .doc(userId)
               .get();
 
-      if (userDoc.exists) {
-        _navigateByUserRole(userDoc);
-      } else {
-        if (mounted) {
-          setState(() {
-            _errorMessage = 'Usuario no encontrado.';
-          });
-        }
+      if (!userDocSnapshot.exists) {
+        // Usuario no registrado en Firestore
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _errorMessage =
+              'Tu cuenta no está registrada correctamente. Contacta con soporte.';
+        });
+        return;
       }
+
+      final userData = userDocSnapshot.data();
+
+      if (userData == null || userData['status'] != 'activo') {
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _errorMessage = 'Tu cuenta está inactiva. Contacta con soporte.';
+        });
+        return;
+      }
+
+      // 3. Actualizar último login
+      await userDocSnapshot.reference.update({
+        'lastLogin': FieldValue.serverTimestamp(),
+      });
+
+      // 4. Navegar según el rol
+      _navigateByUserRole(userDocSnapshot);
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(() {
@@ -100,58 +115,59 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-        return; // Usuario canceló el inicio de sesión
+        setState(() {
+          _isLoading = false;
+        });
+        return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+      final googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithCredential(credential);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        credential,
+      );
 
-      // Verificar si el usuario ya existe en Firestore
-      final userDoc =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userCredential.user!.uid)
-              .get();
-      if (!userDoc.exists) {
-        // Si no existe, crear el documento del usuario con campos relevantes
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-              'name': googleUser.displayName,
-              'email': googleUser.email,
-              'role': 'alumno', // Asigna un rol por defecto
-              'groups':
-                  [], // Inicialmente, el usuario no pertenece a ningún grupo
-              'status': 'activo', // Estado inicial del usuario
-              'createdAt': FieldValue.serverTimestamp(),
-              'lastLogin':
-                  FieldValue.serverTimestamp(), // Fecha y hora del último inicio de sesión
-            });
+      final userId = userCredential.user!.uid;
+
+      final userDocRef = FirebaseFirestore.instance
+          .collection('users_rescatadores_app')
+          .doc(userId);
+
+      final userDocSnapshot = await userDocRef.get();
+
+      if (!userDocSnapshot.exists) {
+        // Crear nuevo documento
+        await userDocRef.set({
+          'name': googleUser.displayName,
+          'email': googleUser.email,
+          'role': 'alumno',
+          'groups': [],
+          'status': 'activo',
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastLogin': FieldValue.serverTimestamp(),
+        });
+
+        // Obtener el nuevo snapshot para navegar correctamente
+        final newUserDocSnapshot = await userDocRef.get();
+        _navigateByUserRole(newUserDocSnapshot);
       } else {
-        // Actualizar la fecha y hora del último inicio de sesión si el usuario ya existe
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .update({'lastLogin': FieldValue.serverTimestamp()});
-      }
+        // Si existe, validar estado y actualizar login
+        final data = userDocSnapshot.data();
+        if (data == null || data['status'] != 'activo') {
+          await FirebaseAuth.instance.signOut();
+          setState(() {
+            _errorMessage = 'Tu cuenta está inactiva. Contacta con soporte.';
+          });
+          return;
+        }
 
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        await userDocRef.update({'lastLogin': FieldValue.serverTimestamp()});
+        _navigateByUserRole(userDocSnapshot);
       }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -190,23 +206,30 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateByUserRole(DocumentSnapshot userDoc) {
-    switch (userDoc.get('role')) {
+    final role = userDoc.get('role');
+
+    Widget targetScreen;
+
+    switch (role) {
       case 'administrador':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AdminHomeScreen()),
-        );
+        targetScreen = const AdminHomeScreen();
         break;
       case 'asesor':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const AsesorHomeScreen()),
-        );
+        targetScreen = const AsesorHomeScreen();
         break;
       case 'alumno':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        targetScreen = const HomeScreen();
         break;
+      default:
+        setState(() {
+          _errorMessage = 'Rol no reconocido. Contacta con soporte.';
+        });
+        return;
     }
+
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => targetScreen));
   }
 
   @override

@@ -145,7 +145,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen> {
           itemBuilder: (context, index) {
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
-                  .collection('users')
+                  .collection('users_rescatadores_app')
                   .doc(members[index])
                   .get(),
               builder: (context, userSnapshot) {

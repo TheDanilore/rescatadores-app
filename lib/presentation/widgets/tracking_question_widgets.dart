@@ -175,7 +175,7 @@ class EmptyQuestionsView extends StatelessWidget {
           ),
           const SizedBox(height: 16.0),
           Text(
-            'No hay preguntas para ${type == 'grupo' ? 'grupos' : 'alumnos'}',
+            'No hay preguntas para ${type == 'grupo' ? 'grupos' : 'personas'}',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -320,7 +320,7 @@ class _QuestionFormState extends State<QuestionForm> {
           ),
           const SizedBox(width: AppTheme.spacingS),
           Text(
-            'Tipo: ${widget.type == 'grupo' ? 'Grupo' : 'Alumno'}',
+            'Tipo: ${widget.type == 'grupo' ? 'Grupo' : 'Individual'}',
             style: TextStyle(
               color: AppTheme.primaryColor,
               fontWeight: FontWeight.bold,

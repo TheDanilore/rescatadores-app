@@ -65,10 +65,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Guardar información adicional en Firestore
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(userCredential.user!.uid)
           .set({
             'email': _emailController.text.trim(),
+            'name':
+                '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
             'firstName': _firstNameController.text.trim(),
             'lastName': _lastNameController.text.trim(),
             'phone': _phoneController.text.trim(),
@@ -223,7 +225,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(height: AppTheme.spacingS),
           Text(
-            'Crea una cuenta para ingresar al sistema como Rescatadores',
+            'Crea una cuenta para ingresar al sistema',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppTheme.textSecondaryColor,
               fontSize: isLargeScreen ? 20 : 16,
@@ -262,9 +264,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Por favor, ingresa tu número de teléfono';
-              }
+              // El teléfono ahora es opcional
               return null;
             },
           ),

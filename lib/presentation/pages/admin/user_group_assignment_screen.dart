@@ -42,7 +42,7 @@ class _UserGroupAssignmentScreenState extends State<UserGroupAssignmentScreen> {
 
       // Cargar grupos de otros usuarios administradores
       final QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .where('role', isEqualTo: 'administrador')
           .get();
 
@@ -75,7 +75,7 @@ class _UserGroupAssignmentScreenState extends State<UserGroupAssignmentScreen> {
     try {
       // Actualizar los grupos del usuario en Firestore
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(widget.userId)
           .update({
             'groups': _userGroups,
@@ -333,9 +333,9 @@ class _UserGroupAssignmentScreenState extends State<UserGroupAssignmentScreen> {
   String _getRoleDisplay(String role) {
     switch (role) {
       case 'alumno':
-        return 'Discípulo';
+        return 'Persona';
       case 'asesor':
-        return 'Acompañante';
+        return 'Rescatador';
       case 'administrador':
         return 'Coordinador';
       default:

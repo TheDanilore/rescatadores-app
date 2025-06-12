@@ -22,8 +22,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   // Traducciones de roles para la UI
   final Map<String, String> _roleDisplay = {
-    'alumno': 'Discípulo',
-    'asesor': 'Acompañante',
+    'alumno': 'Persona',
+    'asesor': 'Rescatador',
     'administrador': 'Coordinador',
   };
 
@@ -71,8 +71,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         child: Row(
                           children: [
                             _buildRoleFilterChip(null, 'Todos'),
-                            _buildRoleFilterChip('alumno', 'Discípulos'),
-                            _buildRoleFilterChip('asesor', 'Acompañantes'),
+                            _buildRoleFilterChip('alumno', 'Personas'),
+                            _buildRoleFilterChip('asesor', 'Rescatadores'),
                             _buildRoleFilterChip(
                               'administrador',
                               'Coordinadores',
@@ -91,7 +91,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream:
-                  FirebaseFirestore.instance.collection('users').snapshots(),
+                  FirebaseFirestore.instance.collection('users_rescatadores_app').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -292,7 +292,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       }
 
       final response = await http.post(
-        Uri.parse('https://deleteuserrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://deleteuserrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',

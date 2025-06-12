@@ -55,7 +55,7 @@ class _CrearAlumnoScreenState extends State<CrearAlumnoScreen> {
       if (currentUser != null) {
         DocumentSnapshot asesorDoc =
             await FirebaseFirestore.instance
-                .collection('users')
+                .collection('users_rescatadores_app')
                 .doc(currentUser.uid)
                 .get();
 
@@ -136,7 +136,7 @@ class _CrearAlumnoScreenState extends State<CrearAlumnoScreen> {
       }
 
       final response = await http.post(
-        Uri.parse('https://createalumnorest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://createalumnorestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',

@@ -52,6 +52,20 @@
       "predeploy": [
         "npm --prefix \"$RESOURCE_DIR\" run lint"
       ]
+    },
+    {
+      "source": "rescatadores-app-data-connect",
+      "codebase": "rescatadores-app-data-connect",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
     }
   ],
   "emulators": {
@@ -63,7 +77,8 @@
     "source": "dataconnect"
   },
   "hosting": {
-    "public": "web",
+    "site": "rescatadores-app-9ea9d-aea3e",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -73,6 +88,17 @@
       {
         "source": "**",
         "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.js",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/javascript"
+          }
+        ]
       }
     ]
   }

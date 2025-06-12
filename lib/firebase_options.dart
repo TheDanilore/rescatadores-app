@@ -48,12 +48,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAaawTqisHVCgYpDZlqjx8S9bR_iIfZWas',
-    appId: '1:506221282284:web:222c120bc9295bcd07f6c9',
+    appId: '1:506221282284:web:599361891fc87ffb07f6c9',
     messagingSenderId: '506221282284',
     projectId: 'asesor-app-9ea9d',
     authDomain: 'asesor-app-9ea9d.firebaseapp.com',
     storageBucket: 'asesor-app-9ea9d.firebasestorage.app',
-    measurementId: 'G-FX9H53H02B',
+    measurementId: 'G-8FJWBQD7PQ',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -74,4 +74,5 @@ class DefaultFirebaseOptions {
     iosClientId: '506221282284-72t8rmcqqfeiff0vht1rt8tab6kcutt4.apps.googleusercontent.com',
     iosBundleId: 'com.example.rescatadoresApp',
   );
+
 }

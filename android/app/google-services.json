@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "506221282284-nk3l7frite1tbekgpge20l8o1chveome.apps.googleusercontent.com",
+              "client_id": "506221282284-72t8rmcqqfeiff0vht1rt8tab6kcutt4.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.asesorApp"
+                "bundle_id": "com.example.rescatadoresApp"
               }
             }
           ]
@@ -75,10 +75,10 @@
               "client_type": 3
             },
             {
-              "client_id": "506221282284-nk3l7frite1tbekgpge20l8o1chveome.apps.googleusercontent.com",
+              "client_id": "506221282284-72t8rmcqqfeiff0vht1rt8tab6kcutt4.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.asesorApp"
+                "bundle_id": "com.example.rescatadoresApp"
               }
             }
           ]

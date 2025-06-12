@@ -88,7 +88,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
       // Luego actualizar el resto de los datos en Firestore
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection('users_rescatadores_app')
           .doc(widget.userId)
           .update({
             'name':
@@ -135,7 +135,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -205,7 +205,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
       // Llamar a la Cloud Function para eliminar el usuario
       final response = await http.post(
-        Uri.parse('https://deleteuserrest-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse('https://deleteuserrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -476,8 +476,8 @@ class _UserEditScreenState extends State<UserEditScreen> {
           label: 'Rol',
           icon: Icons.badge,
           items: const [
-            DropdownMenuItem(value: 'alumno', child: Text('Discípulo')),
-            DropdownMenuItem(value: 'asesor', child: Text('Acompañante')),
+            DropdownMenuItem(value: 'alumno', child: Text('Persona')),
+            DropdownMenuItem(value: 'asesor', child: Text('Rescatador')),
             DropdownMenuItem(
               value: 'administrador',
               child: Text('Coordinador'),
@@ -608,8 +608,8 @@ class _UserEditScreenState extends State<UserEditScreen> {
                 label: 'Rol',
                 icon: Icons.badge,
                 items: const [
-                  DropdownMenuItem(value: 'alumno', child: Text('Discípulo')),
-                  DropdownMenuItem(value: 'asesor', child: Text('Acompañante')),
+                  DropdownMenuItem(value: 'alumno', child: Text('Persona')),
+                  DropdownMenuItem(value: 'asesor', child: Text('Rescatador')),
                   DropdownMenuItem(
                     value: 'administrador',
                     child: Text('Coordinador'),

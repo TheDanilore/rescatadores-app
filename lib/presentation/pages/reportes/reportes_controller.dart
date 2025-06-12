@@ -106,7 +106,7 @@ class ReportesController extends ChangeNotifier {
 
     try {
       DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(_userId).get();
+          await _firestore.collection('users_rescatadores_app').doc(_userId).get();
 
       if (_disposed) return;
 
@@ -196,7 +196,7 @@ class ReportesController extends ChangeNotifier {
     // 1. Cargar seguimientos grupales
     try {
       Query seguimientosQuery = _firestore
-          .collection('seguimientos')
+          .collection('seguimientos_rescatadores_app')
           .where('tipo', isEqualTo: 'grupal')
           .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
           .where('timestamp', isLessThan: endTimestamp);
@@ -264,7 +264,7 @@ class ReportesController extends ChangeNotifier {
 
             QuerySnapshot alumnosQuery =
                 await _firestore
-                    .collection('users')
+                    .collection('users_rescatadores_app')
                     .where('role', isEqualTo: 'alumno')
                     .where('groups', arrayContains: groupId)
                     .get();
@@ -288,7 +288,7 @@ class ReportesController extends ChangeNotifier {
 
               QuerySnapshot batchQuery =
                   await _firestore
-                      .collection('seguimientos')
+                      .collection('seguimientos_rescatadores_app')
                       .where('tipo', isEqualTo: 'individual')
                       .where('alumnoId', whereIn: batch)
                       .where(
@@ -306,7 +306,7 @@ class ReportesController extends ChangeNotifier {
         } else {
           // Para administradores, obtener todos según filtros
           Query seguimientosIndQuery = _firestore
-              .collection('seguimientos')
+              .collection('seguimientos_rescatadores_app')
               .where('tipo', isEqualTo: 'individual')
               .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
               .where('timestamp', isLessThan: endTimestamp);
@@ -498,7 +498,7 @@ class ReportesController extends ChangeNotifier {
 
       try {
         DocumentSnapshot alumnoDoc =
-            await _firestore.collection('users').doc(alumnoId).get();
+            await _firestore.collection('users_rescatadores_app').doc(alumnoId).get();
 
         if (_disposed) return;
 
