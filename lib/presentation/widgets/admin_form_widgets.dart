@@ -14,7 +14,7 @@ class FormSectionHeader extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            fontSize: 18, 
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor,
           ),
@@ -69,6 +69,51 @@ class FormInputField extends StatelessWidget {
   }
 }
 
+class FormTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final IconData icon;
+  final TextInputType keyboardType;
+  final String? Function(String?)? validator;
+
+  const FormTextField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.icon,
+    this.keyboardType = TextInputType.text,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      maxLines: null,
+      minLines: 4,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: 'Ingrese $label',
+        prefixIcon: Icon(icon, color: AppTheme.primaryColor),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      keyboardType: keyboardType,
+      validator: validator,
+      textInputAction: TextInputAction.next,
+    );
+  }
+}
+
 class FormPasswordField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
@@ -77,6 +122,56 @@ class FormPasswordField extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const FormPasswordField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.isObscure,
+    required this.toggleObscure,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: 'Ingrese $label',
+        prefixIcon: const Icon(Icons.lock, color: AppTheme.primaryColor),
+        suffixIcon: IconButton(
+          icon: Icon(
+            isObscure ? Icons.visibility_off : Icons.visibility,
+            color: AppTheme.primaryColor,
+          ),
+          onPressed: toggleObscure,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade400),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      obscureText: isObscure,
+      validator: validator,
+      textInputAction: TextInputAction.next,
+    );
+  }
+}
+
+class FormPasswordFieldPerfil extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final bool isObscure;
+  final VoidCallback toggleObscure;
+  final String? Function(String?)? validator;
+
+  const FormPasswordFieldPerfil({
     super.key,
     required this.controller,
     required this.label,
@@ -181,10 +276,7 @@ class ErrorMessageBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.red),
       ),
-      child: Text(
-        message,
-        style: const TextStyle(color: Colors.red),
-      ),
+      child: Text(message, style: const TextStyle(color: Colors.red)),
     );
   }
 }

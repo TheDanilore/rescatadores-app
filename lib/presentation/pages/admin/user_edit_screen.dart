@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:rescatadores_app/config/theme.dart';
 
 class UserEditScreen extends StatefulWidget {
@@ -23,6 +24,9 @@ class _UserEditScreenState extends State<UserEditScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _ageController;
+  late TextEditingController _redemptionDateController;
+  late TextEditingController _childDateBirthController;
+  late TextEditingController _reasonAbortionController;
 
   late String _selectedRole;
   late String _selectedStatus;
@@ -52,6 +56,15 @@ class _UserEditScreenState extends State<UserEditScreen> {
     _ageController = TextEditingController(
       text: (widget.userData['age']).toString(),
     );
+    _redemptionDateController = TextEditingController(
+      text: widget.userData['redemptionDate'] ?? '',
+    );
+    _childDateBirthController = TextEditingController(
+      text: widget.userData['childDateBirth'] ?? '',
+    );
+    _reasonAbortionController = TextEditingController(
+      text: widget.userData['reasonAbortion'] ?? '',
+    );
 
     _selectedRole = widget.userData['role'] ?? 'alumno';
     _selectedStatus = widget.userData['status'] ?? 'activo';
@@ -64,6 +77,9 @@ class _UserEditScreenState extends State<UserEditScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _ageController.dispose();
+    _redemptionDateController.dispose();
+    _childDateBirthController.dispose();
+    _reasonAbortionController.dispose();
     super.dispose();
   }
 
@@ -86,20 +102,30 @@ class _UserEditScreenState extends State<UserEditScreen> {
         await _updateUserEmail();
       }
 
-      // Luego actualizar el resto de los datos en Firestore
+      // Construir los datos comunes
+      final updateData = {
+        'name':
+            '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'age': int.tryParse(_ageController.text.trim()) ?? 0,
+        'role': _selectedRole,
+        'status': _selectedStatus,
+      };
+
+      // Agregar campos especiales solo si es alumno
+      if (_selectedRole == 'alumno') {
+        updateData['redemptionDate'] = _redemptionDateController.text.trim();
+        updateData['childDateBirth'] = _childDateBirthController.text.trim();
+        updateData['reasonAbortion'] = _reasonAbortionController.text.trim();
+      }
+
+      // Actualizar en Firestore
       await FirebaseFirestore.instance
           .collection('users_rescatadores_app')
           .doc(widget.userId)
-          .update({
-            'name':
-                '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
-            'firstName': _firstNameController.text.trim(),
-            'lastName': _lastNameController.text.trim(),
-            'phone': _phoneController.text.trim(),
-            'age': int.tryParse(_ageController.text.trim()) ?? 0,
-            'role': _selectedRole,
-            'status': _selectedStatus,
-          });
+          .update(updateData);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +161,9 @@ class _UserEditScreenState extends State<UserEditScreen> {
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse(
+          'https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -425,7 +453,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
         ),
         const SizedBox(height: 16),
 
-        // Email - ahora habilitado para edición
+        // Email
         _buildTextField(
           controller: _emailController,
           label: 'Correo Electrónico',
@@ -468,6 +496,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
           keyboardType: TextInputType.number,
           validator: _validateAge,
         ),
+
         const SizedBox(height: 16),
 
         // Rol
@@ -489,7 +518,42 @@ class _UserEditScreenState extends State<UserEditScreen> {
             });
           },
         ),
+
         const SizedBox(height: 16),
+
+        if (_selectedRole == 'alumno') ...[
+          _buildTextField(
+            controller: _redemptionDateController,
+            label: 'Fecha de Rescate (dd/mm/aaaa)',
+            icon: Icons.date_range_outlined,
+            keyboardType: TextInputType.text,
+            validator: _validateDate,
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildTextField(
+            controller: _childDateBirthController,
+            label: 'Fecha probable de parto (dd/mm/aaaa)',
+            icon: Icons.date_range_outlined,
+            keyboardType: TextInputType.text,
+            validator: _validateDate,
+          ),
+
+          const SizedBox(height: 16),
+          _buildTextAreaField(
+            controller: _reasonAbortionController,
+            label: 'Motivo por el que iba a abortar',
+            icon: Icons.question_mark,
+            keyboardType: TextInputType.text,
+            enabled: true, // Habilitado para edición
+            validator: (value) {
+              return null;
+            },
+          ),
+
+          const SizedBox(height: 16),
+        ],
 
         // Estado
         _buildDropdownField(
@@ -645,8 +709,70 @@ class _UserEditScreenState extends State<UserEditScreen> {
             ),
           ],
         ),
+
+        const SizedBox(height: 16),
+
+        if (_selectedRole == 'alumno') ...[
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _redemptionDateController,
+                  label: 'Fecha de Rescate (dd/mm/aaaa)',
+                  icon: Icons.date_range_outlined,
+                  keyboardType: TextInputType.text,
+                  validator: _validateDate,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildTextField(
+                  controller: _childDateBirthController,
+                  label: 'Fecha probable de parto (dd/mm/aaaa)',
+                  icon: Icons.date_range_outlined,
+                  keyboardType: TextInputType.text,
+                  validator: _validateDate,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Correo electrónico
+          _buildTextAreaField(
+            controller: _reasonAbortionController,
+            label: 'Motivo por el que iba a abortar',
+            icon: Icons.question_mark,
+            keyboardType: TextInputType.text,
+            enabled: true, // Habilitado para edición
+            validator: (value) {
+              return null;
+            },
+          ),
+        ],
       ],
     );
+  }
+
+  String? _validateDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    // Validar formato con RegEx dd/mm/aaaa
+    final regex = RegExp(r'^\d{2}/\d{2}/\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return 'Formato inválido. Ingresa dd/mm/aaaa, ej. 13/07/2024';
+    }
+
+    try {
+      final date = DateFormat('dd/MM/yyyy').parseStrict(value);
+      // Agregar lógica extra para fechas futuras, pasadas, etc.
+    } catch (e) {
+      return 'Fecha inválida';
+    }
+
+    return null;
   }
 
   // Funciones de validación extraídas para claridad
@@ -700,6 +826,38 @@ class _UserEditScreenState extends State<UserEditScreen> {
   }) {
     return TextFormField(
       controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: enabled ? Colors.grey[100] : Colors.grey[200],
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16.0,
+          horizontal: 16.0,
+        ),
+      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      enabled: enabled,
+      validator: validator,
+      style: TextStyle(color: enabled ? Colors.black : Colors.grey[700]),
+    );
+  }
+
+  Widget _buildTextAreaField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    bool enabled = true,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      maxLines: null,
+      minLines: 4,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

@@ -186,7 +186,7 @@ class _AlumnoTrackingScreenState extends State<AlumnoTrackingScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_search),
-            tooltip: 'Detalles del Persona',
+            tooltip: 'Detalles de la Persona',
             onPressed:
                 () => AlumnoDetailsModal.show(
                   context,

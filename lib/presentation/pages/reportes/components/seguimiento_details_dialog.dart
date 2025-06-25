@@ -14,14 +14,14 @@ Future<void> showSeguimientoDetailsDialog({
   try {
     final questionsSnapshot =
         await FirebaseFirestore.instance
-            .collection('tracking_questions')
+            .collection('tracking_questions_rescatadores_app')
             .where('type', isEqualTo: tipo == 'individual' ? 'alumno' : 'grupo')
             .where('isActive', isEqualTo: true)
             .orderBy('number')
             .get();
 
     for (var doc in questionsSnapshot.docs) {
-      questionTitles[doc.id] = doc.data()['hint'] ?? 'Pregunta sin título';
+      questionTitles[doc.id] = doc.data()['title'] ?? 'Pregunta sin título';
     }
   } catch (e) {
     print('Error al cargar títulos de preguntas: $e');
@@ -32,18 +32,39 @@ Future<void> showSeguimientoDetailsDialog({
   List<MapEntry<String, dynamic>> questionsData =
       data.entries.where((entry) => entry.key.startsWith('question_')).toList();
 
-  // Ordenar las preguntas basándose en el orden de los títulos
+  // Crear un mapa auxiliar con el orden real de cada pregunta
+  Map<String, int> questionOrderMap = {};
+  try {
+    final questionsSnapshot =
+        await FirebaseFirestore.instance
+            .collection('tracking_questions_rescatadores_app')
+            .where('type', isEqualTo: tipo == 'individual' ? 'alumno' : 'grupo')
+            .where('isActive', isEqualTo: true)
+            .orderBy('order') // <- Usa este campo para el orden
+            .get();
+
+    for (var doc in questionsSnapshot.docs) {
+      final data = doc.data();
+      final id = doc.id;
+final title = data['title']?.toString() ?? 'Pregunta sin título';
+      final order = data['order'] ?? 999; // valor por defecto si no hay
+
+      questionTitles[id] = title;
+      questionOrderMap[id] = order;
+    }
+  } catch (e) {
+    print('Error al cargar títulos de preguntas: $e');
+  }
+
+  // Ordenar las preguntas según el campo `order`
   questionsData.sort((a, b) {
     String aId = a.key.replaceAll('question_', '');
     String bId = b.key.replaceAll('question_', '');
-    return (int.tryParse(
-              questionTitles.keys.toList().indexOf(aId).toString(),
-            ) ??
-            0)
-        .compareTo(
-          int.tryParse(questionTitles.keys.toList().indexOf(bId).toString()) ??
-              0,
-        );
+
+    int aOrder = questionOrderMap[aId] ?? 999;
+    int bOrder = questionOrderMap[bId] ?? 999;
+
+    return aOrder.compareTo(bOrder);
   });
 
   String title =
@@ -144,7 +165,7 @@ Future<void> showSeguimientoDetailsDialog({
                                           ),
                                         ),
                                         child: Text(
-                                          entry.value.toString(),
+                                          entry.value?.toString() ?? '',
                                           style: TextStyle(
                                             fontSize: 15,
                                             color: Colors.grey.shade800,

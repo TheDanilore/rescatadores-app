@@ -18,7 +18,6 @@ class UserManagementScreen extends StatefulWidget {
 class _UserManagementScreenState extends State<UserManagementScreen> {
   String _searchQuery = '';
   String? _selectedRoleFilter;
-  bool _isLoading = false;
 
   // Traducciones de roles para la UI
   final Map<String, String> _roleDisplay = {
@@ -283,7 +282,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   }
 
   Future<void> _deleteUser(String userId) async {
-    setState(() => _isLoading = true);
 
     try {
       final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
@@ -319,7 +317,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         ),
       );
     } finally {
-      setState(() => _isLoading = false);
     }
   }
 

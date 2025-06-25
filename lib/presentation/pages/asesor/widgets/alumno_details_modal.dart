@@ -106,6 +106,10 @@ class _CombinedAlumnoDetailsFormState
   late TextEditingController _phoneController;
   late TextEditingController _ageController;
 
+  late TextEditingController _redemptionDateController;
+  late TextEditingController _childDateBirthController;
+  late TextEditingController _reasonAbortionController;
+
   late String _selectedStatus;
   String? _errorMessage;
   bool _isLoading = false;
@@ -135,6 +139,15 @@ class _CombinedAlumnoDetailsFormState
     _ageController = TextEditingController(
       text: (widget.alumnoData['age'] ?? 0).toString(),
     );
+    _redemptionDateController = TextEditingController(
+      text: widget.alumnoData['redemptionDate'] ?? '',
+    );
+    _childDateBirthController = TextEditingController(
+      text: widget.alumnoData['childDateBirth'] ?? '',
+    );
+    _reasonAbortionController = TextEditingController(
+      text: widget.alumnoData['reasonAbortion'] ?? '',
+    );
 
     _selectedStatus = widget.alumnoData['status'] ?? 'activo';
   }
@@ -146,6 +159,9 @@ class _CombinedAlumnoDetailsFormState
     _emailController.dispose();
     _phoneController.dispose();
     _ageController.dispose();
+    _redemptionDateController.dispose();
+    _childDateBirthController.dispose();
+    _reasonAbortionController.dispose();
     super.dispose();
   }
 
@@ -198,6 +214,9 @@ class _CombinedAlumnoDetailsFormState
         'phone': _phoneController.text.trim(),
         'age': int.tryParse(_ageController.text.trim()) ?? 0,
         'status': _selectedStatus,
+        'redemptionDate': _redemptionDateController.text.trim(),
+        'childDateBirth': _childDateBirthController.text.trim(),
+        'reasonAbortion': _reasonAbortionController.text.trim(),
       };
 
       // Si el email cambió, incluirlo en la actualización de Firestore
@@ -230,11 +249,14 @@ class _CombinedAlumnoDetailsFormState
       widget.alumnoData['phone'] = _phoneController.text.trim();
       widget.alumnoData['age'] = int.tryParse(_ageController.text.trim()) ?? 0;
       widget.alumnoData['status'] = _selectedStatus;
+      widget.alumnoData['redemptionDate'] = _redemptionDateController.text.trim();
+      widget.alumnoData['childDateBirth'] = _childDateBirthController.text.trim();
+      widget.alumnoData['easonAbortion'] = _reasonAbortionController.text.trim();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Discípulo actualizado exitosamente'),
+            content: Text('Persona actualizado exitosamente'),
             backgroundColor: Colors.green,
           ),
         );
@@ -248,7 +270,7 @@ class _CombinedAlumnoDetailsFormState
     } catch (e) {
       print('ERROR general en actualización: $e');
       setState(() {
-        _errorMessage = 'Error al actualizar discípulo: $e';
+        _errorMessage = 'Error al actualizar persona: $e';
         _isLoading = false;
       });
     }
@@ -274,7 +296,9 @@ class _CombinedAlumnoDetailsFormState
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse(
+          'https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -305,7 +329,10 @@ class _CombinedAlumnoDetailsFormState
   Future<String> _getUserRole(String uid) async {
     try {
       final userDoc =
-          await FirebaseFirestore.instance.collection('users_rescatadores_app').doc(uid).get();
+          await FirebaseFirestore.instance
+              .collection('users_rescatadores_app')
+              .doc(uid)
+              .get();
 
       if (userDoc.exists) {
         return userDoc.data()?['role'] ?? 'desconocido';
@@ -338,7 +365,7 @@ class _CombinedAlumnoDetailsFormState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _isEditMode ? 'Editar Discípulo' : 'Detalles del Discípulo',
+                  _isEditMode ? 'Editar Persona' : 'Detalles de la Persona',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor,
@@ -417,6 +444,27 @@ class _CombinedAlumnoDetailsFormState
             icon: Icons.group,
             label: 'Grupos',
             value: _getGroupsDisplay(),
+          ),
+          const SizedBox(height: 16),
+
+          _buildInfoRow(
+            icon: Icons.date_range_outlined,
+            label: 'Fecha de Rescate',
+            value: widget.alumnoData['redemptionDate'] ?? 'No disponible',
+          ),
+          const SizedBox(height: 16),
+
+          _buildInfoRow(
+            icon: Icons.date_range_outlined,
+            label: 'Fecha probable de parto',
+            value: widget.alumnoData['childDateBirth'] ?? 'No disponible',
+          ),
+          const SizedBox(height: 16),
+
+          _buildInfoRow(
+            icon: Icons.question_mark,
+            label: 'Motivo por el que iba a abortar',
+            value: widget.alumnoData['reasonAbortion'] ?? 'No disponible',
           ),
           const SizedBox(height: 16),
 
@@ -635,6 +683,90 @@ class _CombinedAlumnoDetailsFormState
             ),
             const SizedBox(height: 16),
 
+            // Fecha de Rescate
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Fecha de Rescate',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                TextFormField(
+                  controller: _redemptionDateController,
+                  decoration: InputDecoration(
+                    hintText: 'Fecha de Rescate',
+                    prefixIcon: const Icon(Icons.date_range_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Fecha probable de parto
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Fecha probable de parto',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                TextFormField(
+                  controller: _childDateBirthController,
+                  decoration: InputDecoration(
+                    hintText: 'Fecha probable de parto',
+                    prefixIcon: const Icon(Icons.date_range_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Motivo por el que iba a abortar
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Motivo por el que iba a abortar',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                TextFormField(
+                  controller: _reasonAbortionController,
+                  decoration: InputDecoration(
+                    hintText: 'Motivo por el que iba a abortar',
+                    prefixIcon: const Icon(Icons.question_mark),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                  ),
+                  validator: (value) {
+                    return null;
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             // Estado
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,6 +796,12 @@ class _CombinedAlumnoDetailsFormState
                       _phoneController.text = widget.alumnoData['phone'] ?? '';
                       _ageController.text =
                           (widget.alumnoData['age'] ?? 0).toString();
+                      _redemptionDateController.text =
+                          widget.alumnoData['redemptionDate'] ?? '';
+                      _childDateBirthController.text =
+                          widget.alumnoData['childDateBirth'] ?? '';
+                      _reasonAbortionController.text =
+                          widget.alumnoData['reasonAbortion'] ?? '';
                       _selectedStatus = widget.alumnoData['status'] ?? 'activo';
 
                       // Volver a modo visualización

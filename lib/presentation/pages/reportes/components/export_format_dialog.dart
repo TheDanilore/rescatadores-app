@@ -23,13 +23,13 @@ Future<String?> showExportFormatDialog(BuildContext context) async {
               Navigator.pop(context, 'excel');
             },
           ),
-          // ListTile(
-          //   leading: const Icon(Icons.picture_as_pdf),
-          //   title: const Text('PDF'),
-          //   onTap: () {
-          //     Navigator.pop(context, 'pdf');
-          //   },
-          // ),
+          ListTile(
+            leading: const Icon(Icons.picture_as_pdf),
+            title: const Text('PDF'),
+            onTap: () {
+              Navigator.pop(context, 'pdf');
+            },
+          ),
         ],
       ),
       actions: [

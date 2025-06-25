@@ -45,7 +45,7 @@ class GroupHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: AppTheme.spacingS),
                   Text(
-                    '$alumnosCount discípulos',
+                    '$alumnosCount personas',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppTheme.textSecondaryColor,
                     ),

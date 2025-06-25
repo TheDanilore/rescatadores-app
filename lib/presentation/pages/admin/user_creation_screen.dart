@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rescatadores_app/presentation/widgets/admin_form_widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class AdminUserCreationScreen extends StatefulWidget {
   const AdminUserCreationScreen({super.key});
@@ -24,6 +25,9 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
   final _ageController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _redemptionDateController = TextEditingController();
+  final _childDateBirthController = TextEditingController();
+  final _reasonAbortionController = TextEditingController();
 
   List<Map<String, dynamic>> _availableGroups = [];
   List<String> _selectedGroups = [];
@@ -56,6 +60,9 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
     _ageController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _redemptionDateController.dispose();
+    _childDateBirthController.dispose();
+    _reasonAbortionController.dispose();
     super.dispose();
   }
 
@@ -116,7 +123,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
     });
 
     try {
-      // Preparar datos para enviar
+      // Datos base comunes
       final data = {
         'email': _emailController.text.trim(),
         'password': _passwordController.text.trim(),
@@ -129,17 +136,32 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
         'status': _selectedStatus,
       };
 
+      late String url;
+
+      if (_selectedRole == 'alumno') {
+        // Agregar solo si es alumno
+        data['redemptionDate'] = _redemptionDateController.text.trim();
+        data['childDateBirth'] = _childDateBirthController.text.trim();
+        data['reasonAbortion'] = _reasonAbortionController.text.trim();
+
+        // Cambiar la URL para alumnos
+        url = 'https://createalumnorestrescatadores-gsgjkmd7rq-uc.a.run.app';
+      } else {
+        // URL por defecto para otros roles
+        url = 'https://createuserrestrescatadores-gsgjkmd7rq-uc.a.run.app';
+      }
+
       print("Preparando llamada a REST API con datos: $data");
 
-      // Obtener token de autenticación
+      // Obtener token
       final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (idToken == null) {
         throw Exception('No se pudo obtener el token de autenticación');
       }
 
-      // Hacer la llamada REST a la función
+      // Llamada HTTP
       final response = await http.post(
-        Uri.parse('https://createuserrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -150,7 +172,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
       print("Respuesta recibida [${response.statusCode}]: ${response.body}");
 
       if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
+        jsonDecode(response.body);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -161,7 +183,6 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
             ),
           );
 
-          // Limpiar el formulario
           _formKey.currentState!.reset();
           _firstNameController.clear();
           _lastNameController.clear();
@@ -170,6 +191,10 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
           _ageController.clear();
           _passwordController.clear();
           _confirmPasswordController.clear();
+          _redemptionDateController.clear();
+          _childDateBirthController.clear();
+          _reasonAbortionController.clear();
+
           setState(() {
             _selectedRole = 'alumno';
             _selectedStatus = 'activo';
@@ -200,6 +225,26 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
     }
   }
 
+  String? validateDate(String? value) {
+    if (value == null || value.isEmpty) {
+      return null;
+    }
+
+    // Validar formato con RegEx dd/mm/aaaa
+    final regex = RegExp(r'^\d{2}/\d{2}/\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return 'Formato inválido. Ingresa dd/mm/aaaa, ej. 13/07/2024';
+    }
+
+    try {
+      final date = DateFormat('dd/MM/yyyy').parseStrict(value);
+      // Agregar lógica extra para fechas futuras, pasadas, etc.
+    } catch (e) {
+      return 'Fecha inválida';
+    }
+
+    return null;
+  }
   bool _isDesktop(BuildContext context) {
     return MediaQuery.of(context).size.width >= 992;
   }
@@ -422,6 +467,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
                         ),
                       ],
                     ),
+
                   const SizedBox(height: 24),
 
                   // Sección Acceso y Permisos
@@ -549,6 +595,130 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
                     ),
                   const SizedBox(height: 16),
 
+                  if (_selectedRole == 'alumno') ...[
+                    FormSectionHeader(title: 'Datos Adicionales'),
+                    if (isSmallScreen)
+                      Column(
+                        children: [
+                          FormInputField(
+                            controller: _redemptionDateController,
+                            label: 'Fecha de Rescate (dd/mm/aaaa)',
+                            icon: Icons.date_range_outlined,
+                            keyboardType: TextInputType.text,
+                            validator: validateDate,
+                          ),
+                          const SizedBox(height: 16),
+                          FormInputField(
+                            controller: _childDateBirthController,
+                            label: 'Fecha probable de parto (dd/mm/aaaa)',
+                            icon: Icons.date_range_outlined,
+                            keyboardType: TextInputType.text,
+                            validator: validateDate,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _reasonAbortionController,
+                            keyboardType: TextInputType.multiline,
+                            maxLines: null,
+                            minLines: 4,
+                            validator: (value) => null,
+                            decoration: InputDecoration(
+                              labelText: 'Motivo por el que iba a abortar',
+                              alignLabelWithHint: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 16.0,
+                                horizontal: 12.0,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: AppTheme.primaryColor,
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormInputField(
+                              controller: _redemptionDateController,
+                              label: 'Fecha de Rescate (dd/mm/aaaa)',
+                              icon: Icons.date_range_outlined,
+                              keyboardType: TextInputType.text,
+                              validator: validateDate,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: FormInputField(
+                              controller: _childDateBirthController,
+                              label: 'Fecha probable de parto (dd/mm/aaaa)',
+                              icon: Icons.date_range_outlined,
+                              keyboardType: TextInputType.text,
+                              validator: validateDate,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _reasonAbortionController,
+                              keyboardType: TextInputType.multiline,
+                              maxLines: null,
+                              minLines: 4,
+                              validator: (value) => null,
+                              decoration: InputDecoration(
+                                labelText: 'Motivo por el que iba a abortar',
+                                alignLabelWithHint: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 16.0,
+                                  horizontal: 12.0,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: AppTheme.primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                                filled: true,
+                                fillColor: Colors.grey.shade50,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                  ],
+
                   // Asignación de grupos
                   FormSectionHeader(title: 'Asignación de Grupos'),
 
@@ -556,7 +726,7 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
-                        'Nota: Los discípulos solo pueden pertenecer a un grupo',
+                        'Nota: Las personas solo pueden pertenecer a un grupo',
                         style: TextStyle(
                           color: Colors.orange.shade800,
                           fontStyle: FontStyle.italic,
@@ -740,4 +910,5 @@ class _AdminUserCreationScreenState extends State<AdminUserCreationScreen> {
       ),
     );
   }
+
 }

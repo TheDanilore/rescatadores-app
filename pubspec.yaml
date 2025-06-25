@@ -58,6 +58,7 @@ dependencies:
   share_plus: ^10.1.4
   excel: ^4.0.6
   pdf: ^3.11.3
+  universal_html: ^2.2.4
 
 dev_dependencies:
   flutter_test:

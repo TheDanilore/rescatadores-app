@@ -88,11 +88,9 @@ class NotificationService {
 
     // Escuchar la renovación del token
     _fcm.onTokenRefresh.listen((newToken) async {
-      if (newToken != null) {
-        print('New FCM Token: $newToken');
-        await _saveTokenToDatabase(newToken);
-      }
-    });
+      print('New FCM Token: $newToken');
+      await _saveTokenToDatabase(newToken);
+        });
 
     // Guardar token en cambios de estado de autenticación
     FirebaseAuth.instance.authStateChanges().listen((User? user) async {

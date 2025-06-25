@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:rescatadores_app/config/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:rescatadores_app/presentation/pages/login_screen.dart';
+import 'package:rescatadores_app/presentation/widgets/admin_form_widgets.dart';
 
 class AsesorProfileScreen extends StatefulWidget {
   const AsesorProfileScreen({super.key});
@@ -23,6 +24,11 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
   final _phoneController = TextEditingController();
   final _ageController = TextEditingController();
   final _roleController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  bool _obscureConfirmPassword = true;
+  bool _showPasswordField = false;
 
   String? _originalEmail; // Para detectar cambios en el correo
   List<String> _grupos = [];
@@ -47,6 +53,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
     _phoneController.dispose();
     _ageController.dispose();
     _roleController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -67,16 +74,16 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () {
-                setState(() {
-                  _isEditing = true;
-                });
-              },
-              tooltip: 'Editar perfil',
-            ),
+          IconButton(
+            icon: Icon(_isEditing ? Icons.close : Icons.edit_outlined),
+            onPressed: () {
+              setState(() {
+                _isEditing = !_isEditing;
+              });
+            },
+            tooltip: _isEditing ? 'Cancelar edición' : 'Editar perfil',
+          ),
+
           IconButton(
             icon: const Icon(Icons.logout_outlined),
             onPressed: _cerrarSesion,
@@ -224,7 +231,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                     validator: _validateEmail, // Agregado validador
                   ),
                   // Nota sobre cambio de correo (visible solo en modo edición)
-                  if (_isEditing)
+                  if (_isEditing) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: 4, bottom: 8),
                       child: Text(
@@ -235,6 +242,69 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                           fontStyle: FontStyle.italic,
                         ),
                       ),
+                    ),
+                  ],
+
+                  _buildProfileField(
+                    label: 'Contraseña',
+                    value: '•••••••••••••',
+                    icon: Icons.lock_outline,
+                    isEditing: false,
+                    controller: _passwordController,
+                  ),
+
+                  // Botón para mostrar el campo si está en edición
+                  if (_isEditing)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _showPasswordField = !_showPasswordField;
+                          });
+                        },
+                        icon: Icon(
+                          _showPasswordField
+                              ? Icons.visibility_off
+                              : Icons.lock_open,
+                          color: AppTheme.primaryColor,
+                        ),
+                        label: Text(
+                          _showPasswordField
+                              ? 'Ocultar campo de contraseña'
+                              : 'Cambiar contraseña',
+                          style: TextStyle(
+                            color: AppTheme.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Campo para cambiar contraseña (solo si _showPasswordField es true)
+                  if (_isEditing && _showPasswordField)
+                    _buildProfileField(
+                      label: 'Nueva contraseña',
+                      value: '',
+                      icon: Icons.lock_outline,
+                      isEditing: true,
+                      controller: _passwordController,
+                      isPassword: true,
+                      obscureText: _obscurePassword,
+                      onToggleVisibility: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Ingrese la nueva contraseña';
+                        }
+                        if (value.trim().length < 6) {
+                          return 'Mínimo 6 caracteres';
+                        }
+                        return null;
+                      },
                     ),
                 ],
               ),
@@ -359,7 +429,7 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                   validator: _validateEmail, // Agregado validador
                 ),
                 // Nota sobre cambio de correo (visible solo en modo edición)
-                if (_isEditing)
+                if (_isEditing) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: 4, bottom: 8),
                     child: Text(
@@ -370,6 +440,66 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
                         fontStyle: FontStyle.italic,
                       ),
                     ),
+                  ),
+                ],
+                _buildProfileField(
+                  label: 'Contraseña',
+                  value: '•••••••••••••',
+                  icon: Icons.lock_outline,
+                  isEditing: false,
+                  controller: _passwordController,
+                ),
+
+                // Botón para mostrar el campo si está en edición
+                if (_isEditing)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _showPasswordField = !_showPasswordField;
+                        });
+                      },
+                      icon: Icon(
+                        _showPasswordField
+                            ? Icons.visibility_off
+                            : Icons.lock_open,
+                        color: AppTheme.primaryColor,
+                      ),
+                      label: Text(
+                        _showPasswordField
+                            ? 'Ocultar campo de contraseña'
+                            : 'Cambiar contraseña',
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Campo para cambiar contraseña (solo si _showPasswordField es true)
+                if (_isEditing && _showPasswordField)
+                  _buildProfileField(
+                    label: 'Nueva contraseña',
+                    value: '',
+                    icon: Icons.lock_outline,
+                    isEditing: true,
+                    controller: _passwordController,
+                    isPassword: true,
+                    obscureText: _obscurePassword,
+                    onToggleVisibility: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Ingrese la nueva contraseña';
+                      }
+                      if (value.trim().length < 6) return 'Mínimo 6 caracteres';
+                      return null;
+                    },
                   ),
               ],
             ),
@@ -447,6 +577,9 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
     required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
+    bool isPassword = false,
+    bool obscureText = false,
+    VoidCallback? onToggleVisibility,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -458,8 +591,21 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
           isEditing
               ? TextFormField(
                 controller: controller,
+                obscureText: isPassword ? obscureText : false,
                 decoration: InputDecoration(
                   prefixIcon: Icon(icon, color: AppTheme.primaryColor),
+                  suffixIcon:
+                      isPassword
+                          ? IconButton(
+                            icon: Icon(
+                              obscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: onToggleVisibility,
+                          )
+                          : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -656,7 +802,9 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
 
       // Llamar a la Cloud Function para actualizar el correo
       final response = await http.post(
-        Uri.parse('https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app'),
+        Uri.parse(
+          'https://updateuseremailrestrescatadores-gsgjkmd7rq-uc.a.run.app',
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $idToken',
@@ -675,181 +823,89 @@ class _AsesorProfileScreenState extends State<AsesorProfileScreen> {
     }
   }
 
-void _guardarCambios() async {
-  if (!_formKey.currentState!.validate()) return;
+  void _guardarCambios() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  // Verificar si el correo ha cambiado
-  final newEmail = _emailController.text.trim();
-  _emailChanged = _originalEmail != newEmail;
+    final newEmail = _emailController.text.trim();
+    final newPassword = _passwordController.text.trim();
 
-  // 1. Si el correo NO cambió, actualizar normalmente todo
-  if (!_emailChanged) {
-    await _actualizarPerfilSinCambioCorreo();
-    return;
-  }
+    _emailChanged = _originalEmail != newEmail;
+    final passwordChanged = newPassword.isNotEmpty;
 
-  // 2. Para cambio de correo, mostrar confirmación
-  bool confirmar = await showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Confirmar cambio de correo'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Al cambiar su correo electrónico:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('• Su sesión se cerrará automáticamente'),
-            const Text('• Deberá iniciar sesión nuevamente'),
-            const Text(
-              '• Use su nuevo correo para el próximo inicio de sesión',
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '¿Está seguro que desea cambiar su correo de "$_originalEmail" a "$newEmail"?',
-              style: const TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
-            child: const Text('Confirmar cambio'),
-          ),
-        ],
-      );
-    },
-  ) ?? false;
+    // Si no hubo cambios críticos, actualizar solo perfil
+    if (!_emailChanged && !passwordChanged) {
+      await _actualizarPerfilSinCambioCorreo();
+      return;
+    }
 
-  if (!confirmar) {
-    _emailController.text = _originalEmail!;
-    return;
-  }
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
 
-  // 3. Actualizar solo datos básicos primero en Firestore
-  setState(() => _isLoading = true);
-  
-  User? currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser == null) {
-    setState(() => _isLoading = false);
-    return;
-  }
+    // Si cambió el correo, confirmar primero
+    if (_emailChanged) {
+      bool confirmar =
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('Confirmar cambio de correo'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Al cambiar su correo electrónico:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text('• Su sesión se cerrará automáticamente'),
+                      const Text('• Deberá iniciar sesión nuevamente'),
+                      const Text(
+                        '• Use su nuevo correo para el próximo inicio de sesión',
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '¿Está seguro que desea cambiar su correo de "$_originalEmail" a "$newEmail"?',
+                        style: const TextStyle(fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Cancelar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                      ),
+                      child: const Text('Confirmar cambio'),
+                    ),
+                  ],
+                ),
+          ) ??
+          false;
 
-  try {
-    // Actualizar perfil básico en Firestore ANTES de cambiar el correo
-    // para evitar problemas de token invalidado
-    final updateData = {
-      'name': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
-      'firstName': _firstNameController.text,
-      'lastName': _lastNameController.text,
-      'phone': _phoneController.text.isEmpty ? null : _phoneController.text,
-      'age': int.tryParse(_ageController.text) ?? 0,
-      'email': newEmail, // Incluir el nuevo correo en Firestore
-    };
+      if (!confirmar) {
+        _emailController.text = _originalEmail!;
+        return;
+      }
+    }
 
-    await FirebaseFirestore.instance
-        .collection('users_rescatadores_app')
-        .doc(currentUser.uid)
-        .update(updateData);
+    setState(() => _isLoading = true);
 
-    await currentUser.updateDisplayName(_nombreController.text);
-
-    // 4. Actualizar el correo (esto invalidará el token)
-    await _updateUserEmail(currentUser.uid, newEmail);
-
-    // 5. Mostrar mensaje y redirigir a login INMEDIATAMENTE
-    setState(() => _isLoading = false);
-    
-    if (mounted) {
-  await showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext dialogContext) {  // Usa un contexto específico para el diálogo
-      return AlertDialog(
-        title: const Text('Correo actualizado'),
-        content: const Text(
-          'Su correo electrónico ha sido actualizado exitosamente. Por motivos de seguridad, necesita iniciar sesión nuevamente usando su nuevo correo.',
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();  // Cierra el diálogo primero
-              
-              // Usa try-catch para el cierre de sesión
-              try {
-                FirebaseAuth.instance.signOut().then((_) {
-                  if (mounted) {  // Verifica de nuevo si está montado
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  }
-                }).catchError((error) {
-                  print('Error al cerrar sesión: $error');
-                  // Si falla el cierre de sesión normal, intenta navegar directamente
-                  if (mounted) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  }
-                });
-              } catch (e) {
-                print('Error general al cerrar sesión: $e');
-                // Si falla todo lo anterior, intenta esta forma
-                if (mounted) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context, 
-                    '/login', 
-                    (route) => false
-                  );
-                }
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor),
-            child: const Text('Entendido'),
-          ),
-        ],
-      );
-    },
-  );
-}
-  } catch (e) {
-    setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error al actualizar: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
-
-// Método auxiliar para actualización sin cambio de correo
-Future<void> _actualizarPerfilSinCambioCorreo() async {
-  setState(() => _isLoading = true);
-
-  User? currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser != null) {
     try {
-      await currentUser.updateDisplayName(_nombreController.text);
-
+      // Primero actualiza los datos en Firestore
       final updateData = {
-        'name': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+        'name':
+            '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'phone': _phoneController.text.isEmpty ? null : _phoneController.text,
         'age': int.tryParse(_ageController.text) ?? 0,
+        'email': newEmail,
       };
 
       await FirebaseFirestore.instance
@@ -857,17 +913,74 @@ Future<void> _actualizarPerfilSinCambioCorreo() async {
           .doc(currentUser.uid)
           .update(updateData);
 
-      setState(() {
-        _isEditing = false;
-        _isLoading = false;
-      });
+      await currentUser.updateDisplayName(_nombreController.text);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Perfil actualizado exitosamente'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Si cambió la contraseña, actualízala ahora
+      if (passwordChanged) {
+        await _updateUserPassword(currentUser.uid, newPassword);
+      }
+
+      // Si cambió el correo, hazlo al final porque invalida sesión
+      if (_emailChanged) {
+        await _updateUserEmail(currentUser.uid, newEmail);
+
+        setState(() => _isLoading = false);
+
+        // Mostrar mensaje y redirigir
+        if (mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                title: const Text('Correo actualizado'),
+                content: const Text(
+                  'Su correo electrónico ha sido actualizado exitosamente. Por motivos de seguridad, necesita iniciar sesión nuevamente usando su nuevo correo.',
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      try {
+                        await FirebaseAuth.instance.signOut();
+                        if (mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/login',
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                    ),
+                    child: const Text('Entendido'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        // Si solo cambió la contraseña
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado correctamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -877,10 +990,84 @@ Future<void> _actualizarPerfilSinCambioCorreo() async {
         ),
       );
     }
-  } else {
-    setState(() => _isLoading = false);
   }
-}
+
+  Future<void> _updateUserPassword(String userId, String newPassword) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      final idToken = await currentUser?.getIdToken();
+
+      final response = await http.post(
+        Uri.parse(
+          'https://updateuserpasswordrescatadores-gsgjkmd7rq-uc.a.run.app',
+        ),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $idToken',
+        },
+        body: jsonEncode({'userId': userId, 'newPassword': newPassword}),
+      );
+
+      if (response.statusCode != 200) {
+        final error = jsonDecode(response.body);
+        throw Exception(
+          error['error'] ?? 'Error desconocido al cambiar contraseña',
+        );
+      }
+    } catch (e) {
+      print('Error al cargar datos: $e');
+      throw Exception('Error al cambiar contraseña: $e');
+    }
+  }
+
+  // Método auxiliar para actualización sin cambio de correo
+  Future<void> _actualizarPerfilSinCambioCorreo() async {
+    setState(() => _isLoading = true);
+
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      try {
+        await currentUser.updateDisplayName(_nombreController.text);
+
+        final updateData = {
+          'name':
+              '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'phone': _phoneController.text.isEmpty ? null : _phoneController.text,
+          'age': int.tryParse(_ageController.text) ?? 0,
+        };
+
+        await FirebaseFirestore.instance
+            .collection('users_rescatadores_app')
+            .doc(currentUser.uid)
+            .update(updateData);
+
+        setState(() {
+          _isEditing = false;
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
+
   String _formatTimestamp(Timestamp? timestamp) {
     if (timestamp == null) return 'No disponible';
     return DateFormat('dd/MM/yyyy HH:mm').format(timestamp.toDate());

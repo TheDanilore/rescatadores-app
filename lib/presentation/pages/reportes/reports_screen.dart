@@ -64,20 +64,6 @@ class _ReportesScreenState extends State<ReportesScreen>
     await _controller.initializeData();
   }
 
-  // Método para exportar los seguimientos seleccionados
-  Future<void> _exportSelectedSeguimientos(String tipo) async {
-    final format = await showExportFormatDialog(context);
-    if (format != null) {
-      await _controller.exportSelectedSeguimientos(
-        selectedSeguimientos,
-        tipo,
-        format,
-        onSuccess:
-            () => _showSuccessSnackbar('Seguimientos exportados correctamente'),
-        onError: (error) => _showErrorSnackbar(error),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

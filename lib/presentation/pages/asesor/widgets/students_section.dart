@@ -40,7 +40,7 @@ class StudentsSection extends StatelessWidget {
         Icon(Icons.people, color: AppTheme.primaryColor),
         const SizedBox(width: 8),
         Text(
-          'Discípulos del grupo',
+          'Personas del grupo',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: AppTheme.secondaryColor,
@@ -65,7 +65,7 @@ class StudentsSection extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 24),
           child: Text(
-            'No hay discípulos en este grupo',
+            'No hay personas en este grupo',
             style: TextStyle(color: Colors.grey),
           ),
         ),
@@ -91,7 +91,7 @@ class StudentsSection extends StatelessWidget {
       title: Center(
         child: TextButton.icon(
           icon: const Icon(Icons.expand_more),
-          label: const Text('Ver todos los discípulos'),
+          label: const Text('Ver todos las personas'),
           onPressed: onShowAllStudents,
           style: TextButton.styleFrom(foregroundColor: AppTheme.primaryColor),
         ),

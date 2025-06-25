@@ -6,12 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:excel/excel.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_html/html.dart' as html;
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 
 /// Servicio para exportar datos de seguimientos en diferentes formatos
 class ExportService {
@@ -167,7 +166,6 @@ class ExportService {
 
       // Preparar encabezados
       List<String> headers = [];
-      int colIndex = 0;
 
       if (tipo == 'grupal') {
         headers = ['Grupo', 'Semana', 'Fecha'];
@@ -322,8 +320,7 @@ class ExportService {
     }
   }
 
-  /// Exportar a formato PDF
-  /// Exportar a formato PDF
+  // Exportar a formato PDF
   Future<bool> _exportToPdf(
     List<Map<String, dynamic>> seguimientos,
     String fileName,
@@ -572,34 +569,29 @@ class ExportService {
     );
   }
 
-  // Obtener los títulos de las preguntas desde Firestore
   Future<Map<String, String>> _getQuestionTitles(
     List<String> questionKeys,
   ) async {
-    Map<String, String> result = {};
+    final Map<String, String> result = {};
 
     try {
-      // Obtener todas las preguntas para los tipos correspondientes
-      QuerySnapshot questionsSnapshot =
+      // Obtener preguntas activas de tipo alumno o grupo
+      final QuerySnapshot questionsSnapshot =
           await _firestore
-              .collection('tracking_questions')
-              .where(
-                'type',
-                whereIn: ['alumno', 'grupo'],
-              ) // Ajustar según el tipo
+              .collection('tracking_questions_rescatadores_app')
+              .where('type', whereIn: ['alumno', 'grupo'])
               .where('isActive', isEqualTo: true)
-              .orderBy('number')
+              .orderBy('order') // ¡Usa el campo 'order' que es numérico!
               .get();
 
-      // Crear un mapa de preguntas ordenadas
-      for (var doc in questionsSnapshot.docs) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        String questionId = doc.id;
+      for (final doc in questionsSnapshot.docs) {
+        final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        final String questionId = doc.id;
 
-        // Verificar si este questionId está en los questionKeys
-        String fullKey = 'question_$questionId';
+        final String fullKey = 'question_$questionId';
         if (questionKeys.contains(fullKey)) {
-          result[fullKey] = data['hint'] ?? 'Pregunta sin título';
+          // Se puede usar 'hint' o 'title' según lo que quieras mostrar
+          result[fullKey] = data['title']?.toString() ?? 'Pregunta sin título';
         }
       }
     } catch (e) {
